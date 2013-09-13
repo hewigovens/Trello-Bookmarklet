@@ -259,23 +259,26 @@
       if(idList && idList.length == 24) {
         next(idList);
       } else {
-        Trello.get("members/me/boards", { fields: "name" }, function(boards){
+        Trello.get("members/me/boards", { fields: "name,closed" }, function(boards){
           $prompt = overlayPrompt('Which list should cards be sent to?<hr><div class="boards"></div>', false, function(){
             idList = $prompt.find("input:checked").attr("id");
             next(idList);
           })
-
           $.each(boards, function(ix, board){
-            $board = $("<div>").appendTo($prompt.find(".boards"))
+          	if (!board.closed) {
+	            $board = $("<div>").appendTo($prompt.find(".boards"))
 
-            Trello.get("boards/" + board.id + "/lists", function(lists){
-              $.each(lists, function(ix, list) {
-                var $div = $("<div>").appendTo($board);
-                idList = list.id;
-                $("<input type='radio'>").attr("id", idList).attr("name", "idList").appendTo($div);
-                $("<label>").text(board.name + " : " + list.name).attr("for", idList).appendTo($div);
-              });
-            })
+	            Trello.get("boards/" + board.id + "/lists", function(lists){
+	              $.each(lists, function(ix, list) {
+	                var $div = $("<div>").appendTo($board);
+	                idList = list.id;
+	                $("<input type='radio'>").attr("id", idList).attr("name", "idList").appendTo($div);
+	                $("<label>").text(board.name + " : " + list.name).attr("for", idList).appendTo($div);
+	              });
+            	})
+          	} else{
+          		window.console.log("skip closed board:", board.name);
+          	}
           });
         });
       }      
